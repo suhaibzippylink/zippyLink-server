@@ -29,6 +29,11 @@ const expenceSchema = new Schema({
         default: Date.now,
         required: true,
       },
+      Voucher_Number: {
+        type: String,
+        required: true,
+        default: "000000",
+      },
       Item: {
         type: String,
         required: true,
