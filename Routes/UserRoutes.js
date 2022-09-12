@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const UsersModal = require("../Modals/UsersModal");
 const usersModal = require("../Modals/UsersModal");
+const jwt = require("jsonwebtoken");
+const { jwtkey } = require("../Keys/Keys");
 const router = express.Router();
 
 router.get("/allUsers", async (req, res) => {
@@ -46,6 +48,33 @@ router.post("/sign-in", async (req, res) => {
   const loggedUser = await UsersModal.findOne({ Email, Password });
   if (loggedUser) res.send({ message: "logged in Successfully!", loggedUser });
   else res.send({ error: "Invalid Email or Password" });
+});
+
+//Login Validation from the database
+router.post("/login", async (req, res) => {
+  const { Email, Password } = req.body;
+  console.log(req.body);
+  if (!Email || !Password)
+    return res.send({ error: "You must Provide Email & Password" });
+  const user = await UsersModal.findOne({ Email });
+  if (!user) return res.send({ error: "User with this email does not exists" });
+  try {
+    await user.comparePassword(Password);
+    const token = jwt.sign(
+      {
+        userID: user._id,
+        Name: user.Name,
+        Email: user.Email,
+        Designation: user.Designation,
+        Phone: user.Phone,
+        Role: user.Role,
+      },
+      jwtkey
+    );
+    res.send({ message: "Logged in Successfully", token });
+  } catch (error) {
+    res.send({ error: "Invalid Email or Password" });
+  }
 });
 
 module.exports = router;

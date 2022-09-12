@@ -42,21 +42,23 @@ const monthlySalarySchema = new Schema({
         type: Number,
         required: true,
         default: function () {
-          return (this.Basic_Salary / 30) * this.Working_Days;
+          return Math.round((this.Basic_Salary / 30) * this.Working_Days);
         },
       },
       TAX: {
         type: Number,
         required: true,
         default: function () {
-          return this.Calculated_Salary * 0.05;
+          return Math.round(this.Calculated_Salary * 0.02);
         },
       },
       Net_Salary: {
         type: Number,
         required: true,
         default: function () {
-          return this.Calculated_Salary - this.TAX - this.AdvancePay;
+          return Math.round(
+            this.Calculated_Salary - this.TAX - this.AdvancePay
+          );
         },
       },
       Paid: {

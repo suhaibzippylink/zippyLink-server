@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const employersModal = require("../Modals/EmployersModal");
 const SalariesModal = require("../Modals/SalariesModal");
-
+const MonthlySalaryModal = require("../Modals/MonthlySalaryModal");
 const employerRouter = express.Router();
 
 //See all Employers
@@ -13,7 +13,9 @@ employerRouter.get("/allEmployers", async (req, res) => {
 
 //Hire Employer
 employerRouter.post("/add-employer", async (req, res) => {
+  console.log(req.body);
   const {
+    month,
     Name,
     Email,
     Designation,
@@ -23,9 +25,6 @@ employerRouter.post("/add-employer", async (req, res) => {
     description,
     BasicSalary,
     StartDate,
-    // Date,
-    // Amount,
-    // Paid,
   } = req.body;
   try {
     const alreadyExist = await employersModal.findOne({ Email });
@@ -43,16 +42,23 @@ employerRouter.post("/add-employer", async (req, res) => {
         BasicSalary,
         description,
         StartDate,
-        //   Date,
-        //   Amount,
-        //   Paid,
       });
-      const salaryRecord = await SalariesModal({
-        Name,
-        Email,
-        Basic_Salary: BasicSalary,
-      });
-      await salaryRecord.save();
+
+      try {
+        const mSalaryRecord = await MonthlySalaryModal.findOneAndUpdate(
+          { Month: month },
+          {}
+        );
+        mSalaryRecord.Employers.push({
+          Name,
+          Email,
+          Basic_Salary: BasicSalary,
+        });
+        await mSalaryRecord.save();
+      } catch (error) {
+        res.send({ error: "Not added in Salary" });
+      }
+
       await newEmployer.save();
       res.send({
         message: "Employer Registered Successfully!!!",
@@ -60,7 +66,7 @@ employerRouter.post("/add-employer", async (req, res) => {
       });
     }
   } catch (error) {
-    res.send({ error });
+    // res.send({ error });
   }
 });
 

@@ -69,6 +69,11 @@ const projectsSchema = new Schema({
         required: true,
         default: Date.now,
       },
+      Voucher_Number: {
+        type: String,
+        required: true,
+        default: "000000",
+      },
     },
   ],
   Status: {

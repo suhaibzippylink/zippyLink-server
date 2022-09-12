@@ -96,7 +96,17 @@ projectRouter.post("/add-project", async (req, res) => {
 
 //Add Project Cost
 projectRouter.post("/add-project-cost", async (req, res) => {
-  const { projectCode, Cost_Title, Cost_Type, Ammount, CreatedAt } = req.body;
+  const {
+    projectCode,
+    Cost_Title,
+    Cost_Type,
+    Ammount,
+    CreatedAt,
+    Account_Email,
+    Name,
+    Email,
+    Voucher_Number,
+  } = req.body;
   console.log(req.body);
   try {
     await ProjectsModal.findOneAndUpdate(
@@ -108,8 +118,10 @@ projectRouter.post("/add-project-cost", async (req, res) => {
         Cost_Type,
         Ammount,
         CreatedAt,
+        Voucher_Number,
       });
       await project.save();
+
       res.send({
         message: "Project Cost Added Successfully!",
         projectCost: project.Project_Cost,
@@ -120,11 +132,39 @@ projectRouter.post("/add-project-cost", async (req, res) => {
       }
       project.Cost = sum;
       await project.save();
+      try {
+        await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+          async (account) => {
+            if (!account) return res.send({ error: "Account does not exist" });
+            account.Debit.push({
+              Person: {
+                Name,
+                Email,
+              },
+              ReceiveAs: `${Cost_Type} Expence`,
+              Ammount,
+              Voucher_Number,
+            });
+
+            let sum = 0;
+            for (let i = 0; i < account.Debit.length; i++) {
+              sum = sum + account.Debit[i].Ammount;
+            }
+            account.Total_Debit = sum;
+            account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
+
+            await account.save();
+            return res.send({ message: "Account Debited Successfully!" });
+          }
+        );
+      } catch (error) {
+        res.send({ error: "Account Not debited" });
+      }
     });
   } catch (error) {
-    res.send({
-      error: "Project Cost Cannot be added! Please Check the Network",
-    });
+    // res.send({
+    //   error: "Project Cost Cannot be added! Please Check the Network",
+    // });
   }
 });
 
