@@ -47,4 +47,37 @@ customerRouter.post("/delete-customer", async (req, res) => {
     res.send({ error: "Cannot delete the Customer" });
   }
 });
+//Update Customer
+customerRouter.post("/update-customer", async (req, res) => {
+  const {
+    id,
+    CreatedAt,
+    Name,
+    Email,
+    Year_Since_Working,
+    Address,
+    description,
+  } = req.body;
+  console.log(req.body);
+  try {
+    await customerModal
+      .findOneAndUpdate(
+        { _id: id },
+        {
+          CreatedAt,
+          Name,
+          Email,
+          Year_Since_Working,
+          Address,
+          description,
+        }
+      )
+      .then(async (response) => {
+        await response.save();
+        res.send({ message: "Updated Successfully" });
+      });
+  } catch (error) {
+    res.send({ error: "Can not update" });
+  }
+});
 module.exports = customerRouter;

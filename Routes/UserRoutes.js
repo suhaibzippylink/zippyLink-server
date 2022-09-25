@@ -77,4 +77,34 @@ router.post("/login", async (req, res) => {
   }
 });
 
+//Reset Password
+router.post("/reset_password", async (req, res) => {
+  const { Email, Password, New_Password, Confirm_New_Password } = req.body;
+  console.log(req.body);
+  if (!Email || !Password)
+    return res.send({ error: "You must Provide Email & Password" });
+  const user = await UsersModal.findOne({ Email });
+  console.log(Password);
+  if (!user) return res.send({ error: "User with this email does not exists" });
+  try {
+    await user.comparePassword(Password);
+    const token = jwt.sign(
+      {
+        userID: user._id,
+        Name: user.Name,
+        Email: user.Email,
+        Designation: user.Designation,
+        Phone: user.Phone,
+        Role: user.Role,
+      },
+      jwtkey
+    );
+    user.Password = New_Password;
+    user.rePassword = Confirm_New_Password;
+    await user.save();
+    res.send({ message: "Password Updated Successfully", token });
+  } catch (error) {
+    res.send({ error: "Invalid Old Password" });
+  }
+});
 module.exports = router;

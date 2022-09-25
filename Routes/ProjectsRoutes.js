@@ -2,15 +2,47 @@ const express = require("express");
 const mongoose = require("mongoose");
 const ExpenceModal = require("../Modals/ExpenceModal");
 const ProjectsModal = require("../Modals/ProjectsModal");
+const CustomerModal = require("../Modals/CustomerModal");
 const Accounts = require("../Modals/Accounts");
 const projectRouter = express.Router();
+const multer = require("multer");
+var path = require("path");
 
+let gCode = "PR_000";
 //Get all Projects
 projectRouter.get("/all-projects", async (req, res) => {
   const allProjects = await ProjectsModal.find();
   res.send({ Projects: allProjects });
 });
-
+//Storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "Uploads/Files");
+  },
+  filename: function (req, file, cb) {
+    // cb(null, "PR_001" + "-" + file.originalname);
+    return cb(null, `PR_000_${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+//Upload
+const upload = multer({ storage: storage });
+//File Upload
+projectRouter.post("/file-upload/:code", upload.single("file"), (req, res) => {
+  const code = req.params.code;
+  console.log("Code is: ", code);
+  gCode = code;
+  if (!req.file) {
+    res.send({
+      success: false,
+      error: "File Can not be added",
+    });
+  }
+  res.send({
+    success: true,
+    message: "File Saved Successfully",
+    file_url: `https://zippylink-server.herokuapp.com/file/${req.file.filename}`,
+  });
+});
 //Add new Project
 projectRouter.post("/add-project", async (req, res) => {
   try {
@@ -30,8 +62,10 @@ projectRouter.post("/add-project", async (req, res) => {
       Account_Email,
       Name,
       Email,
+      File,
     } = req.body;
-    console.log(req.body);
+    console.log("Body: ", req.body);
+
     const alreadyExist = await ProjectsModal.findOne({ Project_Code });
     if (alreadyExist) {
       res.send({ error: "Project with this code already exists." });
@@ -50,6 +84,7 @@ projectRouter.post("/add-project", async (req, res) => {
       Currency,
       Cost,
       Description,
+      File,
     });
     if (!newProject) return res.send({ error: "Project Cannot be Added" });
     await newProject.save();
@@ -81,6 +116,24 @@ projectRouter.post("/add-project", async (req, res) => {
           account.Total_Credit = sum;
           account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
           await account.save();
+          try {
+            await CustomerModal.findOneAndUpdate({ Name: Customer }, {}).then(
+              async (customer) => {
+                customer.Projects.push({
+                  Project_Code,
+                  Date,
+                  Project_Title,
+                  Project_Nature,
+                  Budget,
+                  Cost,
+                });
+                await customer.save();
+                console.log("Customer: ", customer);
+              }
+            );
+          } catch (error) {
+            console.log(error);
+          }
           return res.send({
             message: "Account Credited Successfully!",
           });
@@ -126,11 +179,11 @@ projectRouter.post("/add-project-cost", async (req, res) => {
         message: "Project Cost Added Successfully!",
         projectCost: project.Project_Cost,
       });
-      let sum = 0;
-      for (let i = 0; i < project.Project_Cost.length; i++) {
-        sum = sum + project.Project_Cost[i].Ammount;
-      }
-      project.Cost = sum;
+      // let sum = project.Cost;
+      // for (let i = 0; i < project.Project_Cost.length; i++) {
+      //   sum = sum + project.Project_Cost[i].Ammount;
+      // }
+      project.Cost = project.Cost + Ammount;
       await project.save();
       try {
         await Accounts.findOneAndUpdate({ Account_Email }, {}).then(

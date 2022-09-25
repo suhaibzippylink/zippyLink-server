@@ -13,6 +13,7 @@ const accountsRouter = require("./Routes/AccountsRoutes");
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use("/file", express.static("Uploads/Files"));
 app.use(router);
 app.use(expRouter);
 app.use(employerRouter);
@@ -22,7 +23,7 @@ app.use(customerRouter);
 app.use(accountsRouter);
 
 app.get("/", (req, res) => {
-  res.send({ message: "Updated0.1 Zippy Link Web Server is ON." });
+  res.send({ message: "Updated0.2 Zippy Link Web Server is ON." });
 });
 
 const port = process.env.PORT || 4000;

@@ -39,6 +39,16 @@ const customerSchema = new Schema({
         type: String,
         required: true,
       },
+      Budget: {
+        type: Number,
+        Required: true,
+        default: 0,
+      },
+      Cost: {
+        type: Number,
+        Required: true,
+        default: 0,
+      },
     },
   ],
   Address: {

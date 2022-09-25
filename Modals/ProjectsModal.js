@@ -92,6 +92,9 @@ const projectsSchema = new Schema({
     type: String,
     required: true,
   },
+  File: {
+    type: String,
+  },
 });
 
 module.exports = mongoose.model("projectModal", projectsSchema);
