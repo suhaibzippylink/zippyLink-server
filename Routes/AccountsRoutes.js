@@ -9,11 +9,12 @@ accountsRouter.get("/get-accounts-details", async (req, res) => {
 });
 
 accountsRouter.post("/add-account", async (req, res) => {
-  const { Account_Name, Account_Email } = req.body;
+  const { Account_Name, Account_Email, Currency } = req.body;
   try {
     const newAccount = await Accounts({
       Account_Name,
       Account_Email,
+      Currency,
     });
     await newAccount.save();
     res.send({ message: "Account Created SUccessfully!", newAccount });
@@ -37,7 +38,7 @@ accountsRouter.post("/credit-account", async (req, res) => {
   } = req.body;
   console.log(req.body);
   try {
-    await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+    await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
       async (account) => {
         account.Credit.push({
           CreditBy: {
@@ -54,11 +55,7 @@ accountsRouter.post("/credit-account", async (req, res) => {
           Currency,
         });
 
-        let sum = 0;
-        for (let i = 0; i < account.Credit.length; i++) {
-          sum = sum + account.Credit[i].Ammount;
-        }
-        account.Total_Credit = sum;
+        account.Total_Credit = account.Total_Credit + Ammount;
         account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
         await account.save();
         res.send({ message: "Account Credited Successfully!", account });
@@ -81,7 +78,7 @@ accountsRouter.post("/debit-account", async (req, res) => {
   } = req.body;
   console.log(req.body);
   try {
-    await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+    await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
       async (account) => {
         account.Debit.push({
           Person: {
@@ -92,13 +89,10 @@ accountsRouter.post("/debit-account", async (req, res) => {
           Ammount,
           Date,
           Voucher_Number,
+          Currency,
         });
 
-        let sum = 0;
-        for (let i = 0; i < account.Debit.length; i++) {
-          sum = sum + account.Debit[i].Ammount;
-        }
-        account.Total_Debit = sum;
+        account.Total_Debit = account.Total_Debit + Ammount;
         account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
         await account.save();
         res.send({ message: "Account Debited Successfully!", account });

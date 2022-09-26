@@ -64,6 +64,11 @@ const accountsSchema = new Schema({
     required: true,
     default: 0,
   },
+  Currency: {
+    type: String,
+    required: true,
+    default: "USD",
+  },
 });
 
 module.exports = mongoose.model("accountsModal", accountsSchema);

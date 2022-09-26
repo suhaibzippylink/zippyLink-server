@@ -104,32 +104,33 @@ salaryRouter.post("/pay-monthly", async (req, res) => {
               item.Employers[i].Net_Salary - advanceDeduction;
 
             try {
-              await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
-                async (account) => {
-                  if (!account)
-                    return res.send({ error: "Account does not exist" });
-                  account.Debit.push({
-                    Person: {
-                      Name,
-                      Email,
-                    },
-                    ReceiveAs: `Salary Expence`,
-                    Ammount: item.Employers[i].Net_Salary,
-                    Voucher_Number,
-                  });
+              await Accounts.findOneAndUpdate(
+                { Account_Email, Currency: "AFN" },
+                {}
+              ).then(async (account) => {
+                if (!account)
+                  return res.send({ error: "Account does not exist" });
+                account.Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `Salary Expence`,
+                  Ammount: item.Employers[i].Net_Salary,
+                  Voucher_Number,
+                });
 
-                  let sum = 0;
-                  for (let i = 0; i < account.Debit.length; i++) {
-                    sum = sum + account.Debit[i].Ammount;
-                  }
-                  account.Total_Debit = sum;
-                  account.Cash_Inhand =
-                    account.Total_Credit - account.Total_Debit;
-
-                  await account.save();
-                  return res.send({ message: "Account Debited Successfully!" });
+                let sum = 0;
+                for (let i = 0; i < account.Debit.length; i++) {
+                  sum = sum + account.Debit[i].Ammount;
                 }
-              );
+                account.Total_Debit = sum;
+                account.Cash_Inhand =
+                  account.Total_Credit - account.Total_Debit;
+
+                await account.save();
+                return res.send({ message: "Account Debited Successfully!" });
+              });
             } catch (error) {
               res.send({ error: "Account Cannot be Debited!" });
             }
@@ -178,32 +179,33 @@ salaryRouter.post("/pay-advance", async (req, res) => {
             item.Employers[i].AdvancePay =
               item.Employers[i].AdvancePay + AdvancePay;
             try {
-              await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
-                async (account) => {
-                  if (!account)
-                    return res.send({ error: "Account does not exist" });
-                  account.Debit.push({
-                    Person: {
-                      Name,
-                      Email,
-                    },
-                    ReceiveAs: `Salary Advance Expence`,
-                    Ammount: AdvancePay,
-                    Voucher_Number,
-                  });
+              await Accounts.findOneAndUpdate(
+                { Account_Email, Currency: "AFN" },
+                {}
+              ).then(async (account) => {
+                if (!account)
+                  return res.send({ error: "Account does not exist" });
+                account.Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `Salary Advance Expence`,
+                  Ammount: AdvancePay,
+                  Voucher_Number,
+                });
 
-                  let sum = 0;
-                  for (let i = 0; i < account.Debit.length; i++) {
-                    sum = sum + account.Debit[i].Ammount;
-                  }
-                  account.Total_Debit = sum;
-                  account.Cash_Inhand =
-                    account.Total_Credit - account.Total_Debit;
-
-                  await account.save();
-                  return res.send({ message: "Account Debited Successfully!" });
+                let sum = 0;
+                for (let i = 0; i < account.Debit.length; i++) {
+                  sum = sum + account.Debit[i].Ammount;
                 }
-              );
+                account.Total_Debit = sum;
+                account.Cash_Inhand =
+                  account.Total_Credit - account.Total_Debit;
+
+                await account.save();
+                return res.send({ message: "Account Debited Successfully!" });
+              });
             } catch (error) {
               res.send({ error: "Account Cannot be Debited!" });
             }

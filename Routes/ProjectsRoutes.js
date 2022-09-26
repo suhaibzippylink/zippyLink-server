@@ -81,7 +81,7 @@ projectRouter.post("/add-project", async (req, res) => {
       Supplier,
       Status,
       Budget,
-      Currency,
+      Currency: Currency ? Currency : "AFN",
       Cost,
       Description,
       File,
@@ -93,8 +93,9 @@ projectRouter.post("/add-project", async (req, res) => {
       New_Project: newProject,
     });
     try {
-      await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+      await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
         async (account) => {
+          account.Total_Debit = account.Total_Debit + Cost;
           account.Credit.push({
             CreditBy: {
               Name,
@@ -107,13 +108,10 @@ projectRouter.post("/add-project", async (req, res) => {
             ReceiveAs: `Value of ${Project_Title}`,
             Ammount: Budget,
             Date,
+            Currency,
           });
 
-          let sum = 0;
-          for (let i = 0; i < account.Credit.length; i++) {
-            sum = sum + account.Credit[i].Ammount;
-          }
-          account.Total_Credit = sum;
+          account.Total_Credit = account.Total_Credit + Budget;
           account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
           await account.save();
           try {
@@ -159,6 +157,7 @@ projectRouter.post("/add-project-cost", async (req, res) => {
     Name,
     Email,
     Voucher_Number,
+    Currency,
   } = req.body;
   console.log(req.body);
   try {
@@ -179,14 +178,12 @@ projectRouter.post("/add-project-cost", async (req, res) => {
         message: "Project Cost Added Successfully!",
         projectCost: project.Project_Cost,
       });
-      // let sum = project.Cost;
-      // for (let i = 0; i < project.Project_Cost.length; i++) {
-      //   sum = sum + project.Project_Cost[i].Ammount;
-      // }
+
       project.Cost = project.Cost + Ammount;
+      console.log();
       await project.save();
       try {
-        await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+        await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
           async (account) => {
             if (!account) return res.send({ error: "Account does not exist" });
             account.Debit.push({
@@ -197,13 +194,10 @@ projectRouter.post("/add-project-cost", async (req, res) => {
               ReceiveAs: `${Cost_Type} Expence`,
               Ammount,
               Voucher_Number,
+              Currency,
             });
 
-            let sum = 0;
-            for (let i = 0; i < account.Debit.length; i++) {
-              sum = sum + account.Debit[i].Ammount;
-            }
-            account.Total_Debit = sum;
+            account.Total_Debit = account.Total_Debit + Ammount;
             account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
 
             await account.save();

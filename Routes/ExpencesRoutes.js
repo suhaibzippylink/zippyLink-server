@@ -35,6 +35,7 @@ expRouter.post("/add-expence", async (req, res) => {
     Name,
     Email,
     Voucher_Number,
+    Currency,
   } = req.body;
   console.log(req.body);
   try {
@@ -48,13 +49,14 @@ expRouter.post("/add-expence", async (req, res) => {
           Cost,
           description,
           Voucher_Number,
+          Currency,
         });
         await exp.save();
         res.send({ message: "Expence Added Succesfully!", exp });
       })
       .then(async () => {
         try {
-          await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
+          await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
             async (account) => {
               if (!account)
                 return res.send({ error: "Account does not exist" });
@@ -68,11 +70,7 @@ expRouter.post("/add-expence", async (req, res) => {
                 Voucher_Number,
               });
 
-              let sum = 0;
-              for (let i = 0; i < account.Debit.length; i++) {
-                sum = sum + account.Debit[i].Ammount;
-              }
-              account.Total_Debit = sum;
+              account.Total_Debit = account.Total_Debit + Cost;
               account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
 
               await account.save();

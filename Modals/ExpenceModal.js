@@ -45,6 +45,11 @@ const expenceSchema = new Schema({
       description: {
         type: String,
       },
+      Currency: {
+        type: String,
+        required: true,
+        default: "AFN",
+      },
     },
   ],
 });

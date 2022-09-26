@@ -23,7 +23,7 @@ app.use(customerRouter);
 app.use(accountsRouter);
 
 app.get("/", (req, res) => {
-  res.send({ message: "Updated0.2 Zippy Link Web Server is ON." });
+  res.send({ message: "Updated0.3 Zippy Link Web Server is ON." });
 });
 
 const port = process.env.PORT || 4000;
