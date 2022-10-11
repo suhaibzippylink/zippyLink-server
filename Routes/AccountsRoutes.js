@@ -75,6 +75,7 @@ accountsRouter.post("/debit-account", async (req, res) => {
     Ammount,
     Date,
     Voucher_Number,
+    Currency,
   } = req.body;
   console.log(req.body);
   try {

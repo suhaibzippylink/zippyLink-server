@@ -48,9 +48,7 @@ const monthlySalarySchema = new Schema({
       TAX: {
         type: Number,
         required: true,
-        default: function () {
-          return Math.round(this.Calculated_Salary * 0.02);
-        },
+        default: 0,
       },
       Net_Salary: {
         type: Number,

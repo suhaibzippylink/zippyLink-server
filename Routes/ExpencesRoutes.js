@@ -68,6 +68,7 @@ expRouter.post("/add-expence", async (req, res) => {
                 ReceiveAs: `${Exp_Title} Expence`,
                 Ammount: Cost,
                 Voucher_Number,
+                Currency,
               });
 
               account.Total_Debit = account.Total_Debit + Cost;

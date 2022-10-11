@@ -49,6 +49,7 @@ projectRouter.post("/add-project", async (req, res) => {
     const {
       Project_Code,
       Date,
+      Deadline,
       Customer,
       Project_Title,
       Project_Nature,
@@ -63,6 +64,7 @@ projectRouter.post("/add-project", async (req, res) => {
       Name,
       Email,
       File,
+      Exchange_Rate,
     } = req.body;
     console.log("Body: ", req.body);
 
@@ -74,6 +76,7 @@ projectRouter.post("/add-project", async (req, res) => {
     const newProject = await ProjectsModal({
       Project_Code,
       Date,
+      Deadline,
       Customer,
       Project_Title,
       Project_Nature,
@@ -85,6 +88,7 @@ projectRouter.post("/add-project", async (req, res) => {
       Cost,
       Description,
       File,
+      Exchange_Rate,
     });
     if (!newProject) return res.send({ error: "Project Cannot be Added" });
     await newProject.save();
@@ -158,6 +162,7 @@ projectRouter.post("/add-project-cost", async (req, res) => {
     Email,
     Voucher_Number,
     Currency,
+    Exchange_Rate,
   } = req.body;
   console.log(req.body);
   try {
@@ -171,6 +176,7 @@ projectRouter.post("/add-project-cost", async (req, res) => {
         Ammount,
         CreatedAt,
         Voucher_Number,
+        Exchange_Rate,
       });
       await project.save();
 
@@ -180,6 +186,11 @@ projectRouter.post("/add-project-cost", async (req, res) => {
       });
 
       project.Cost = project.Cost + Ammount;
+      project.Alternate_Cost =
+        project.Alternate_Cost +
+        (Currency === "AFN"
+          ? Ammount / Exchange_Rate
+          : Ammount * Exchange_Rate);
       console.log();
       await project.save();
       try {

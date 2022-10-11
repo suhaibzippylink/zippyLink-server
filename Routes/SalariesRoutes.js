@@ -25,27 +25,9 @@ salaryRouter.post("/update-salary", async (req, res) => {
 });
 
 salaryRouter.post("/add-newMonth", async (req, res) => {
-  // const { Month } = req.body;
-  // let allRecords = await SalariesModal.find();
-  // const newMonthSalaries = await MonthlySalaryModal({
-  //   Month,
-  //   Employers: allRecords,
-  // });
-
-  // await newMonthSalaries.save();
-  // await MonthlySalaryModal.findOneAndUpdate({ Month }, {})
-  //   .then(async (record) => {
-  //     for (var i = 0; i < record.Employers.length; i++) {
-  //       record.Employers[i].Paid = false;
-  //       record.PaidSalaries =
-  //         record.PaidSalaries + record.Employers[i].Net_Salary;
-  //     }
-  //     return await record.save();
-  //   })
-  //   .then((rec) => {
-  //     res.send({ message: "Salary Record Created!", rec });
-  //   });
   const { Month } = req.body;
+  if (await MonthlySalaryModal.findOne({ Month }))
+    return res.send({ error: "This Month Already Exists" });
   const temp = await MonthlySalaryModal.find();
   const allRecords = temp[temp.length - 1].Employers;
   console.log(allRecords);
@@ -118,13 +100,12 @@ salaryRouter.post("/pay-monthly", async (req, res) => {
                   ReceiveAs: `Salary Expence`,
                   Ammount: item.Employers[i].Net_Salary,
                   Voucher_Number,
+                  Currency: "AFN",
                 });
 
-                let sum = 0;
-                for (let i = 0; i < account.Debit.length; i++) {
-                  sum = sum + account.Debit[i].Ammount;
-                }
-                account.Total_Debit = sum;
+                account.Total_Debit =
+                  account.Total_Debit + item.Employers[i].Net_Salary;
+
                 account.Cash_Inhand =
                   account.Total_Credit - account.Total_Debit;
 
@@ -193,13 +174,12 @@ salaryRouter.post("/pay-advance", async (req, res) => {
                   ReceiveAs: `Salary Advance Expence`,
                   Ammount: AdvancePay,
                   Voucher_Number,
+                  Currency: "AFN",
                 });
 
-                let sum = 0;
-                for (let i = 0; i < account.Debit.length; i++) {
-                  sum = sum + account.Debit[i].Ammount;
-                }
-                account.Total_Debit = sum;
+                account.Total_Debit =
+                  account.Total_Debit + item.Employers[i].Net_Salary;
+
                 account.Cash_Inhand =
                   account.Total_Credit - account.Total_Debit;
 

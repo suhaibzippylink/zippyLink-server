@@ -37,9 +37,7 @@ const salarySchema = new Schema({
   TAX: {
     type: Number,
     required: true,
-    default: function () {
-      return this.Calculated_Salary * 0.05;
-    },
+    default: 0,
   },
   Net_Salary: {
     type: Number,
