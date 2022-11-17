@@ -17,29 +17,29 @@ const projectsSchema = new Schema({
     required: true,
     default: function () {
       return this.Currency === "AFN"
-        ? (this.Budget / this.Exchange_Rate).toFixed(2)
-        : (this.Budget * this.Exchange_Rate).toFixed(2);
+        ? this.Budget / this.Exchange_Rate
+        : this.Budget * this.Exchange_Rate;
     },
   },
   BRT: {
     type: Number,
     required: true,
     default: function () {
-      return (this.Budget * 0.02).toFixed(2);
+      return this.Budget * 0.02;
     },
   },
   Alternate_BRT: {
     type: Number,
     required: true,
     default: function () {
-      return (this.Alternate_Budget * 0.02).toFixed(2);
+      return this.Alternate_Budget * 0.02;
     },
   },
   NetAmmount: {
     type: Number,
     required: true,
     default: function () {
-      return (this.Budget - this.BRT).toFixed(2);
+      return this.Budget - this.BRT;
     },
   },
   Alternate_NetAmmount: {
@@ -47,8 +47,8 @@ const projectsSchema = new Schema({
     required: true,
     default: function () {
       return this.Currency === "AFN"
-        ? (this.NetAmmount / this.Exchange_Rate).toFixed(2)
-        : (this.NetAmmount * this.Exchange_Rate).toFixed(2);
+        ? this.NetAmmount / this.Exchange_Rate
+        : this.NetAmmount * this.Exchange_Rate;
     },
   },
   Cost: { type: Number, required: true, default: 0 },
@@ -57,8 +57,8 @@ const projectsSchema = new Schema({
     required: true,
     default: function () {
       return this.Currency === "AFN"
-        ? (this.Cost / this.Exchange_Rate).toFixed(2)
-        : (this.Cost * this.Exchange_Rate).toFixed(2);
+        ? this.Cost / this.Exchange_Rate
+        : this.Cost * this.Exchange_Rate;
     },
   },
   Alternate_Currency: {
@@ -77,6 +77,64 @@ const projectsSchema = new Schema({
       CreatedAt: { type: Date, required: true, default: Date.now },
       Voucher_Number: { type: String, required: true, default: "000000" },
       Exchange_Rate: { type: Number, required: true, default: 85.2 },
+      Cost_Currency: { type: String, required: true, default: "AFN" },
+      Cost_USD: {
+        type: Number,
+        required: true,
+        default: function () {
+          return this.Cost_Currency == "USD"
+            ? this.Ammount
+            : this.Ammount / this.Exchange_Rate;
+        },
+      },
+      Cost_AFN: {
+        type: Number,
+        required: true,
+        default: function () {
+          return this.Cost_Currency == "AFN"
+            ? this.Ammount
+            : this.Ammount * this.Exchange_Rate;
+        },
+      },
+      Alternate_Currency: {
+        type: String,
+        required: true,
+        default: function () {
+          return this.Cost_Currency === "USD"
+            ? "AFN"
+            : this.Cost_Currency === "AFN"
+            ? "USD"
+            : "AFN";
+        },
+      },
+      Alternate_Ammount: {
+        type: Number,
+        required: true,
+        default: function () {
+          return this.Cost_Currency === "AFN"
+            ? this.Ammount / this.Exchange_Rate
+            : this.Ammount * this.Exchange_Rate;
+        },
+      },
+    },
+  ],
+  Project_Budget: [
+    {
+      Description: {
+        type: String,
+        default: `Installment #: 1 (default)`,
+      },
+      ReceivedBy: {
+        Name: { type: String },
+        Email: { type: String },
+      },
+      SubmittedBy: {
+        Client_Name: { type: String },
+        Client_Email: { type: String },
+      },
+      Ammount: { type: Number, required: true, default: 0 },
+      CreatedAt: { type: Date, required: true, default: Date.now },
+      Exchange_Rate: { type: Number, required: true, default: 82.2 },
       Alternate_Currency: {
         type: String,
         required: true,
@@ -93,8 +151,8 @@ const projectsSchema = new Schema({
         required: true,
         default: function () {
           return this.Currency === "AFN"
-            ? (this.Ammount / this.Exchange_Rate).toFixed(2)
-            : (this.Ammount * this.Exchange_Rate).toFixed(2);
+            ? this.Ammount / this.Exchange_Rate
+            : this.Ammount * this.Exchange_Rate;
         },
       },
     },
@@ -104,14 +162,14 @@ const projectsSchema = new Schema({
     type: Number,
     required: true,
     default: function () {
-      return (this.NetAmmount - this.Cost).toFixed(2);
+      return this.NetAmmount - this.Cost;
     },
   },
   Alternate_Revenue: {
     type: Number,
     required: true,
     default: function () {
-      return (this.Alternate_NetAmmount - this.Alternate_Cost).toFixed(2);
+      return this.Alternate_NetAmmount - this.Alternate_Cost;
     },
   },
   Description: { type: String, required: true },

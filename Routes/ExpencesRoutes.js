@@ -36,6 +36,8 @@ expRouter.post("/add-expence", async (req, res) => {
     Email,
     Voucher_Number,
     Currency,
+    Exchange_Rate,
+    Cost_Currency,
   } = req.body;
   console.log(req.body);
   try {
@@ -50,30 +52,93 @@ expRouter.post("/add-expence", async (req, res) => {
           description,
           Voucher_Number,
           Currency,
+          Exchange_Rate,
         });
         await exp.save();
         res.send({ message: "Expence Added Succesfully!", exp });
       })
       .then(async () => {
         try {
-          await Accounts.findOneAndUpdate({ Account_Email, Currency }, {}).then(
+          await Accounts.findOneAndUpdate({ Account_Email }, {}).then(
             async (account) => {
               if (!account)
                 return res.send({ error: "Account does not exist" });
-              account.Debit.push({
-                Person: {
-                  Name,
-                  Email,
-                },
-                ReceiveAs: `${Exp_Title} Expence`,
-                Ammount: Cost,
-                Voucher_Number,
-                Currency,
-              });
+              // account.Debit.push({
+              //   Person: {
+              //     Name,
+              //     Email,
+              //   },
+              //   ReceiveAs: `${Exp_Title} Expence`,
+              //   Ammount: Cost,
+              //   Voucher_Number,
+              // });
 
-              account.Total_Debit = account.Total_Debit + Cost;
-              account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
+              // account.Total_Debit = account.Total_Debit + Cost;
+              // account.Cash_Inhand = account.Total_Credit - account.Total_Debit;
+              if (Cost_Currency == "USD") {
+                account.USD_Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `${Exp_Title} Expence`,
+                  Ammount: Cost,
+                  Voucher_Number,
+                  Entry_Currency: Cost_Currency,
+                  Value_Currency: Cost_Currency,
+                });
+                account.USD_Total_Debit = account.USD_Total_Debit + Cost;
+                account.USD_Cash_Inhand =
+                  account.USD_Total_Credit - account.USD_Total_Debit;
 
+                account.AFN_Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `${Exp_Title} Expence`,
+                  Ammount: Cost * Exchange_Rate,
+                  Voucher_Number,
+                  Entry_Currency: Cost_Currency,
+                  Value_Currency: "AFN",
+                });
+                account.AFN_Total_Debit =
+                  account.AFN_Total_Debit + Cost * Exchange_Rate;
+                account.AFN_Cash_Inhand =
+                  account.AFN_Total_Credit - account.AFN_Total_Debit;
+              } else if (Cost_Currency == "AFN") {
+                account.AFN_Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `${Exp_Title} Expence`,
+                  Ammount: Cost,
+                  Voucher_Number,
+                  Entry_Currency: Cost_Currency,
+                  Value_Currency: Cost_Currency,
+                });
+
+                account.AFN_Total_Debit = account.AFN_Total_Debit + Cost;
+                account.AFN_Cash_Inhand =
+                  account.AFN_Total_Credit - account.AFN_Total_Debit;
+                account.USD_Debit.push({
+                  Person: {
+                    Name,
+                    Email,
+                  },
+                  ReceiveAs: `${Exp_Title} Expence`,
+                  Ammount: Cost / Exchange_Rate,
+                  Voucher_Number,
+                  Entry_Currency: Cost_Currency,
+                  Value_Currency: "USD",
+                });
+
+                account.USD_Total_Debit =
+                  account.USD_Total_Debit + Cost / Exchange_Rate;
+                account.USD_Cash_Inhand =
+                  account.USD_Total_Credit - account.USD_Total_Debit;
+              }
               await account.save();
               return res.send({ message: "Account Debited Successfully!" });
             }

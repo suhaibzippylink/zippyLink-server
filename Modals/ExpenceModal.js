@@ -50,6 +50,11 @@ const expenceSchema = new Schema({
         required: true,
         default: "AFN",
       },
+      Exchange_Rate: {
+        type: Number,
+        required: true,
+        default: 80.2,
+      },
     },
   ],
 });
