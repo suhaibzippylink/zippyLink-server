@@ -2,7 +2,7 @@
   "name": "zippyLink-server",
   "version": "1.0.0",
   "description": "Zippy Link ICT Services Server",
-  "main": "app.js",
+  "main": "index.js",
   "engines": {
     "node": "14.x"
   },
